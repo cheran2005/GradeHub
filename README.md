@@ -3,10 +3,10 @@
 **Gradify** is a student-focused grade management application designed to help students **securely track, plan, and optimize their academic performance**.
 
 This project is a **team effort** by:  
-- **Cheran B**  
-- **Varen R**  
-- **Nithieshan J**  
-- **Nithian B**
+- **Cheran Balakrishnan**  
+- **Varen Rajoo**  
+- **Nithieshan Jeyaganeshan**  
+- **Nithian Brindamohan**
 
 ---
 
