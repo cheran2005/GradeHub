@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    min-height: 100svh; 
+  }
+  
+  body {
+    @apply bg-gradient-to-b from-[rgb(255,145,0)] to-[rgb(255,207,144)];
+    margin: 0;
+    padding: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed; 
+  }
+}
