@@ -413,3 +413,4 @@ C:\Gradify\GradifyApi\obj\Debug\net10.0\refint\Gradify.Api.dll
 C:\Gradify\GradifyApi\obj\Debug\net10.0\Gradify.Api.pdb
 C:\Gradify\GradifyApi\obj\Debug\net10.0\Gradify.Api.genruntimeconfig.cache
 C:\Gradify\GradifyApi\obj\Debug\net10.0\ref\Gradify.Api.dll
+C:\Gradify\GradifyApi\obj\Debug\net10.0\Gradify.Api.sourcelink.json
