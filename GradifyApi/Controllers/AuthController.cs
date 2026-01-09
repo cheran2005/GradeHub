@@ -45,7 +45,7 @@ namespace GradifyApi.Controllers
         public async Task<IActionResult> LoginRequest([FromBody] LoginDto data)
         {
             //Get first user with the same email from the database
-            var user = await _context.Student.FirstOrDefaultAsync( x => x.Email == data.Email.ToLower() );
+            var user = await _context.Student.FirstOrDefaultAsync( x => data.Email != null && x.Email == data.Email.ToLower() );
 
             if (user == null || !user.IsVerified)
             {
@@ -69,6 +69,11 @@ namespace GradifyApi.Controllers
             }
 
             //Return JWT token with users publicID apart of the token
+
+            if (user.Email == null)
+            {
+                return Unauthorized("Invalid User Email");
+            }
             var token = _jwtService.GenerateToken(user.PublicId.ToString(),user.Email);
             
             string RefreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));//Creating Refreshing Token 
@@ -112,10 +117,10 @@ namespace GradifyApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUserRequest([FromBody] RegisterStudentDto data)
         {
-
-            if ( data.Student_name.Length == 0 || data.Password.Length < 6)
+            
+            if ( data.Student_name == null || data.Password == null || data.Email == null || data.Student_name.Length == 0 || data.Password.Length < 6)
             {
-                return Unauthorized("Password or username is too short");
+                return Unauthorized("Invalid password, student, or email");
             }
 
             int verification_code;//Store verification code
@@ -138,7 +143,7 @@ namespace GradifyApi.Controllers
             var user = await _context.Student.FirstOrDefaultAsync( x => x.Email == data.Email.ToLower() );
           
             //Check if email already exists in database
-            if (user != null)
+            if (user != null && user.Email != null)
             {
                 bool isValidPassword = BCrypt.Net.BCrypt.Verify(data.Password, user.Password_hash );
 
@@ -212,7 +217,7 @@ namespace GradifyApi.Controllers
                 //Wait until entire transaction finishes 
                 await _context.SaveChangesAsync();
                 //Send verification code to user email
-                await _emailservice.SendEmailverifyAsync(new_student.Email, new_student.Verification_Code);
+                await _emailservice.SendEmailverifyAsync(new_student.OriginalInputEmail, new_student.Verification_Code);
             }
 
             catch
@@ -242,7 +247,7 @@ namespace GradifyApi.Controllers
         {
 
             //Get user info from database with matching email and verification code
-            var user = await _context.Student.FirstOrDefaultAsync( x => x.Email == data.Email.ToLower() && x.Verification_Code == data.Verification_Code );
+            var user = await _context.Student.FirstOrDefaultAsync( x => data.Email != null && x.Email == data.Email.ToLower() && x.Verification_Code == data.Verification_Code );
 
             if (user == null || user.Verification_Code_Expire <DateTime.UtcNow || user.IsVerified)//check if user exists, verification code has expired yet, or already has been verified
             {
@@ -282,7 +287,7 @@ namespace GradifyApi.Controllers
         public async Task<IActionResult> EditUserRequest([FromBody] EditStudentDto data)
         {
             //check if the name and password of change is appropriate
-            if ( data.Student_name.Length == 0 || data.Password.Length < 6)
+            if ( data.Student_name == null || data.Password == null || data.Student_name.Length == 0 || data.Password.Length < 6)
             {
                 return Unauthorized("Invalid Edit Request");
             }
@@ -340,10 +345,10 @@ namespace GradifyApi.Controllers
 
             //hash the refresh token credentials and check if they match with a users refresh token from the database
             string RefreshToken_Hash = RefreshTokenHashService.GetRefreshHash(RefreshToken);
-            var user = await _context.Student.FirstOrDefaultAsync(x => x.RefreshToken == RefreshToken_Hash);
+            var user = await _context.Student.FirstOrDefaultAsync(x => RefreshToken_Hash != null && x.RefreshToken == RefreshToken_Hash);
             
             //check if user exists or refresh token has been expired
-            if (user == null || user.RefreshToken_Expire< DateTime.UtcNow || !user.IsVerified)
+            if (user == null ||user.Email == null || user.RefreshToken_Expire< DateTime.UtcNow || !user.IsVerified)
             {
                 return Unauthorized("Invalid Refresh Token, Session Will Be Terminated");
             }
@@ -405,7 +410,7 @@ namespace GradifyApi.Controllers
             var Email = User.FindFirstValue(ClaimTypes.Email);
 
             //find user from database 
-            var user = await _context.Student.FirstOrDefaultAsync(x => x.PublicId.ToString() == PublicId.ToString()  && x.Email == Email);
+            var user = await _context.Student.FirstOrDefaultAsync(x =>PublicId != null && x.PublicId.ToString() == PublicId.ToString()  && x.Email == Email);
 
             if (user == null || !user.IsVerified)
             {
@@ -434,7 +439,7 @@ namespace GradifyApi.Controllers
             //find user from database 
             var user = await _context.Student.FirstOrDefaultAsync(x => x.Email == data.Email);
 
-            if (user == null )
+            if (user == null || user.Email == null)
             {
                 return Unauthorized("User does not exist");
             }
