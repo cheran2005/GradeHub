@@ -23,7 +23,7 @@ namespace GradifyApi.Controllers
         private readonly EmailService _emailservice;
 
 
-        //Constructor for dependency Injection on database context
+        //Constructor for dependency Injection 
         public AuthController(AppDbContext context_ , EmailService emailservice_,JwtTokenService jwtService)
         {   
             _jwtService = jwtService;

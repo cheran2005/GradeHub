@@ -11,11 +11,13 @@ namespace GradifyApi.Controllers
 {  
     [ApiController]
     [Route("api/[controller]")]
-
+    //User Semester Controller
     public class SemesterController : Controller
     {
+        //Objects for Dependency Injection
         private readonly AppDbContext _context;
-
+        
+         //Constructor for dependency Injection 
         public SemesterController(AppDbContext context_)
         {   
             _context = context_;
