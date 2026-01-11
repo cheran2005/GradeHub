@@ -12,13 +12,13 @@ namespace GradifyApi.Controllers
     [ApiController]
     [Route("api/[controller]")]
     //User Semester Controller
-    public class SemesterController : Controller
+    public class CourseController : Controller
     {
         //Objects for Dependency Injection
         private readonly AppDbContext _context;
         
         //Constructor for dependency Injection 
-        public SemesterController(AppDbContext context_)
+        public CourseController(AppDbContext context_)
         {   
             _context = context_;
         }
@@ -33,7 +33,7 @@ namespace GradifyApi.Controllers
 
         [Authorize]//Check for valid JWT token
         [HttpGet("SemesterMe")]
-        public async Task<IActionResult> GetSemesterRequest()
+        public async Task<IActionResult> GetCourseRequest()
         {
 
             //Getting user information through claims from jwt token
