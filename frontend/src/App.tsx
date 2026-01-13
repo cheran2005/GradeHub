@@ -1,14 +1,36 @@
+//import react router for client-side navigation
 import { Routes, Route } from "react-router-dom";
-import LoginPage from "./components/Login_Page";
-import RegisterPage from "./components/register_page";
 
-export default function App() {
+
+//import components 
+import Login from "./components/Login";
+import Home from "./components/Home";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+
+
+//Entire web page
+function App() {
+
+  
+
+ 
   return (
-    <Routes>
-      <Route path="/" element={<RegisterPage />} />
-      <Route path="/login" element={<LoginPage />} />
-    </Routes>
-  );
+    
+
+    <div className="relative">
+      <Navbar />
+      
+      <div className="pt-15  h-screen">
+        <Routes>
+          <Route path="/" element={<Home/>} />
+          <Route path="/login" element={<Login/>} />
+        </Routes>
+    </div>
+  </div>
+    
+
+  )
 }
 
-
+export default App
