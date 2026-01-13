@@ -32,8 +32,8 @@ namespace GradifyApi.Controllers
         //Returned: List of semesters user currently has
 
         [Authorize]//Check for valid JWT token
-        [HttpGet("SemesterMe")]
-        public async Task<IActionResult> GetCourseRequest()
+        [HttpGet("CourseMe")]
+        public async Task<IActionResult> GetCourseRequest(int SemesterId)
         {
 
             //Getting user information through claims from jwt token
@@ -50,38 +50,38 @@ namespace GradifyApi.Controllers
             }
 
             //get a list of users semester details
-            var user_semester_list = await _context.Semester.Where(x => user.StudentId == x.StudentId).ToListAsync();
+            var user_semester = await _context.Semester.FirstOrDefaultAsync(x => user.StudentId == x.StudentId && x.SemesterId == SemesterId);
 
             //if user has no semesters
-            if (user_semester_list == null)
+            if (user_semester == null)
             {
-                return Ok(Array.Empty<SemesterInfoDto>());
+                return NotFound();
+            }
+
+            var User_Course_List = await _context.Course.Where(x => x.SemesterId == SemesterId).ToListAsync();
+
+            //if user has no semesters
+            if (User_Course_List == null)
+            {
+                return Ok(Array.Empty<Course>());
             }
 
             //array to store user semester data
-            List<SemesterInfoDto> semester_list_dto = new List<SemesterInfoDto>();
+            List<Course> Course_list_dto = new List<Course>();
 
             //Loop through user_semester_list and store semester data into semester_list_dto to hide StudentId information
-            for (int i = 0; i< user_semester_list.Count; i++)
+            for (int i = 0; i< User_Course_List.Count; i++)
             {
                 //check if any part of the semester data is null 
-                if (user_semester_list[i].SemesterId == null || user_semester_list[i].StudentId == null || user_semester_list[i].Semester_Term == null || user_semester_list[i].Semester_Year == null)
+                if (User_Course_List[i].CourseId == null || user_semester_list[i].SemesterId == null || user_semester_list[i].Course_Code == null || user_semester_list[i].Course_Name == null || user_semester_list[i].Course_Weight == null)
                 {
                     return NotFound();
                 }
 
-                //add semester object to array
-                semester_list_dto.Add(new SemesterInfoDto
-                {
-                    Semester_Term = user_semester_list[i].Semester_Term,
-                    Semester_Year = user_semester_list[i].Semester_Year,
-                    SemesterId = user_semester_list[i].SemesterId
-                });
-
             }
             
             //return list of semesters to user
-            return Ok(semester_list_dto);
+            return Ok(User_Course_List);
         }
 
 

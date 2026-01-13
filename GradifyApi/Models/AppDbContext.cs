@@ -12,6 +12,8 @@ namespace GradifyApi.Data
         public DbSet<Student> Student { get; set; }
         public DbSet<Semester> Semester { get; set; }
 
+        public DbSet<Course> Course { get; set; }
+
 
     }
 }
