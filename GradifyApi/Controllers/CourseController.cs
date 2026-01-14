@@ -32,8 +32,8 @@ namespace GradifyApi.Controllers
         //Returned: List of semesters user currently has
 
         [Authorize]//Check for valid JWT token
-        [HttpGet("CourseMe")]
-        public async Task<IActionResult> GetCourseRequest(int SemesterId)
+        [HttpGet("{semesterid:guid}")]
+        public async Task<IActionResult> GetCourseRequest(Guid SemesterId)
         {
 
             //Getting user information through claims from jwt token
@@ -66,9 +66,6 @@ namespace GradifyApi.Controllers
                 return Ok(Array.Empty<Course>());
             }
 
-            //array to store user semester data
-            List<Course> Course_list_dto = new List<Course>();
-
             //Loop through user_semester_list and store semester data into semester_list_dto to hide StudentId information
             for (int i = 0; i< User_Course_List.Count; i++)
             {
@@ -88,7 +85,6 @@ namespace GradifyApi.Controllers
 
 
 
-
         //Semesters add api endpoint
 
         //Given To Api: JWT Token Information and semester add information
@@ -97,27 +93,34 @@ namespace GradifyApi.Controllers
 
         [Authorize]//Check for valid JWT token
         [HttpPost("Add")]
-        public async Task<IActionResult> AddSemesterRequest(SemesterAddDto data)
+        public async Task<IActionResult> AddCourseRequest(Course data)
         {
             //Getting user information through claims from jwt token
             var PublicId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var Email = User.FindFirstValue(ClaimTypes.Email);
 
             //check if any of the user input is null
-            if (data.Semester_Term == null || data.Semester_Year == null)
+            if (data.CourseId == null || data.SemesterId == null || data.Course_Code == null || data.Course_Name == null || data.Course_Weight == null)
             {
-                return Unauthorized("Invalid Semester Data information");
+                return Unauthorized("Invalid Course Data information");
             }
 
             //find user in database
             var user = await _context.Student.FirstOrDefaultAsync(x =>PublicId != null && x.PublicId.ToString() == PublicId.ToString()  && x.Email == Email);
-
             //check if user exists
             if (user == null || user.StudentId == null)
             {
                 return NotFound();
             }
+            
+            //find semester in database
+            var semester= await _context.Semester.FirstOrDefaultAsync(x =>user.StudentId == x.StudentId && x.SemesterId == data.SemesterId);
 
+            if (semester == null || semester.StudentId == null || semester.SemesterId == null)
+            {
+                return NotFound();
+            }
+            
             //create semester object
             var new_sem = new Semester
             {

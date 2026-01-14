@@ -123,7 +123,8 @@ namespace GradifyApi.Controllers
             {
                 Semester_Term = data.Semester_Term,
                 Semester_Year = data.Semester_Year,
-                StudentId = user.StudentId
+                StudentId = user.StudentId,
+                SemesterId = Guid.NewGuid()
             };
 
             //add semester to database

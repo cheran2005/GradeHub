@@ -7,7 +7,7 @@ namespace GradifyApi.Data
 
         public int? Semester_Year {get; set;}
 
-        public int? SemesterId {get; set;}
+        public Guid? SemesterId {get; set;}
 
     }   
 

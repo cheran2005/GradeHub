@@ -3,8 +3,8 @@ namespace GradifyApi.Data
 
     public class Course
     {
-        public int? CourseId {get; set;}
-        public int? SemesterId {get; set;}
+        public Guid? CourseId {get; set;}
+        public Guid? SemesterId {get; set;}
 
         public string? Course_Code {get; set;}
 

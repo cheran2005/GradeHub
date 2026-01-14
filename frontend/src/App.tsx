@@ -6,7 +6,6 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
 
 
 //Entire web page

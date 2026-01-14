@@ -3,7 +3,7 @@ namespace GradifyApi.Data
 
     public class Semester
     {
-        public int? SemesterId {get; set;}
+        public Guid? SemesterId {get; set;}
         public int? StudentId {get; set;}
 
         public string? Semester_Term {get; set;}
