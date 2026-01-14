@@ -52,11 +52,6 @@ namespace GradifyApi.Controllers
             //get a list of users semester details
             var user_semester_list = await _context.Semester.Where(x => user.StudentId == x.StudentId).ToListAsync();
 
-            //if user has no semesters
-            if (user_semester_list == null)
-            {
-                return Ok(Array.Empty<SemesterInfoDto>());
-            }
 
             //array to store user semester data
             List<SemesterInfoDto> semester_list_dto = new List<SemesterInfoDto>();
@@ -97,7 +92,7 @@ namespace GradifyApi.Controllers
 
         [Authorize]//Check for valid JWT token
         [HttpPost("Add")]
-        public async Task<IActionResult> AddSemesterRequest(SemesterAddDto data)
+        public async Task<IActionResult> AddSemesterRequest([FromBody]SemesterAddDto data)
         {
             //Getting user information through claims from jwt token
             var PublicId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -132,7 +127,7 @@ namespace GradifyApi.Controllers
 
             //Save object to database
             try{await _context.SaveChangesAsync();}
-            catch{Unauthorized("Semester Unsuccesfully Added");}
+            catch{return Unauthorized("Semester Unsuccesfully Added");}
 
             //success message
             return Ok("Semester Added Succesfully");
@@ -180,7 +175,7 @@ namespace GradifyApi.Controllers
 
             //Save object changes to database
             try{await _context.SaveChangesAsync();}
-            catch{Unauthorized("Semester Unsuccesfully edit");}
+            catch{return Unauthorized("Semester Unsuccesfully edit");}
 
             //success message
             return Ok("Semester edit Succesfully");
@@ -230,7 +225,7 @@ namespace GradifyApi.Controllers
 
             //Save object changes to database
             try{await _context.SaveChangesAsync();}
-            catch{Unauthorized("Semester Unsuccesfully Deleted");}
+            catch{return Unauthorized("Semester Unsuccesfully Deleted");}
 
             //success message
             return Ok("Semester Deleted Succesfully");

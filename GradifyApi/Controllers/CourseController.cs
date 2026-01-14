@@ -6,6 +6,7 @@ using System;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Collections.Generic;
+using Microsoft.VisualBasic;
 
 namespace GradifyApi.Controllers
 {  
@@ -32,7 +33,7 @@ namespace GradifyApi.Controllers
         //Returned: List of semesters user currently has
 
         [Authorize]//Check for valid JWT token
-        [HttpGet("{semesterid:guid}")]
+        [HttpGet("{SemesterId:guid}")]
         public async Task<IActionResult> GetCourseRequest(Guid SemesterId)
         {
 
@@ -46,7 +47,7 @@ namespace GradifyApi.Controllers
             //check if user exists
             if (user == null)
             {
-               return NotFound();
+               return Ok("USER");
             }
 
             //get a list of users semester details
@@ -55,22 +56,16 @@ namespace GradifyApi.Controllers
             //if user has no semesters
             if (user_semester == null)
             {
-                return NotFound();
+                return Ok("SEMESTER");
             }
 
             var User_Course_List = await _context.Course.Where(x => x.SemesterId == SemesterId).ToListAsync();
-
-            //if user has no semesters
-            if (User_Course_List == null)
-            {
-                return Ok(Array.Empty<Course>());
-            }
 
             //Loop through user_semester_list and store semester data into semester_list_dto to hide StudentId information
             for (int i = 0; i< User_Course_List.Count; i++)
             {
                 //check if any part of the semester data is null 
-                if (User_Course_List[i].CourseId == null || user_semester_list[i].SemesterId == null || user_semester_list[i].Course_Code == null || user_semester_list[i].Course_Name == null || user_semester_list[i].Course_Weight == null)
+                if (User_Course_List[i].CourseId == null || User_Course_List[i].SemesterId == null || User_Course_List[i].Course_Code == null || User_Course_List[i].Course_Name == null || User_Course_List[i].Course_Weight == null)
                 {
                     return NotFound();
                 }
@@ -93,14 +88,14 @@ namespace GradifyApi.Controllers
 
         [Authorize]//Check for valid JWT token
         [HttpPost("Add")]
-        public async Task<IActionResult> AddCourseRequest(Course data)
+        public async Task<IActionResult> AddCourseRequest([FromBody]CourseAddDto data)
         {
             //Getting user information through claims from jwt token
             var PublicId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var Email = User.FindFirstValue(ClaimTypes.Email);
 
             //check if any of the user input is null
-            if (data.CourseId == null || data.SemesterId == null || data.Course_Code == null || data.Course_Name == null || data.Course_Weight == null)
+            if ( data.SemesterId == null || data.Course_Code == null || data.Course_Name == null || data.Course_Weight == null)
             {
                 return Unauthorized("Invalid Course Data information");
             }
@@ -120,25 +115,31 @@ namespace GradifyApi.Controllers
             {
                 return NotFound();
             }
-            
+
             //create semester object
-            var new_sem = new Semester
+            var new_course = new Course
             {
-                Semester_Term = data.Semester_Term,
-                Semester_Year = data.Semester_Year,
-                StudentId = user.StudentId
+                CourseId = Guid.NewGuid(),
+                SemesterId = semester.SemesterId,
+                Course_Code = data.Course_Code,
+                Course_Name = data.Course_Name,
+                Course_Weight = data.Course_Weight
             };
 
             //add semester to database
-            _context.Semester.Add(new_sem);
+            _context.Course.Add(new_course);
 
             //Save object to database
             try{await _context.SaveChangesAsync();}
-            catch{Unauthorized("Semester Unsuccesfully Added");}
+            catch{return Unauthorized("Course Unsuccesfully Added");}
 
             //success message
-            return Ok("Semester Added Succesfully");
+            return Ok("Course Added Succesfully");
         }
+
+
+
+
 
         //Semesters edit api endpoint
 
@@ -148,16 +149,77 @@ namespace GradifyApi.Controllers
         
         [Authorize]//Check for valid JWT token
         [HttpPost("edit")]
-        public async Task<IActionResult> EditSemesterRequest([FromBody] SemesterInfoDto data)
+        public async Task<IActionResult> EditSemesterRequest([FromBody]Course data)
         {
             //Getting user information through claims from jwt token
             var PublicId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var Email = User.FindFirstValue(ClaimTypes.Email);
 
             //check if any of the user input is null
-            if (data.Semester_Term == null || data.Semester_Year == null)
+            if (data.CourseId == null || data.SemesterId == null || data.Course_Code == null || data.Course_Name == null || data.Course_Weight == null)
             {
-                return Unauthorized("Invalid Semester Data information");
+                return Unauthorized("Invalid Course Data information");
+            }
+
+
+            //find user in database
+            var user = await _context.Student.FirstOrDefaultAsync(x =>PublicId != null && x.PublicId.ToString() == PublicId.ToString()  && x.Email == Email);
+
+            //check if user exists
+            if (user == null || user.StudentId == null)
+            {
+                return NotFound();
+            }
+
+            //find semester in database to edit
+            var semester = await _context.Semester.FirstOrDefaultAsync(x =>user.StudentId == x.StudentId && data.SemesterId == x.SemesterId);
+
+            if (semester == null || semester.SemesterId == null)
+            {
+                return Unauthorized("Semester Does Not Exists");
+            }
+
+            var course = await _context.Course.FirstOrDefaultAsync(x =>semester.SemesterId == x.SemesterId && data.CourseId == x.CourseId);
+
+            if (course == null)
+            {
+                return Unauthorized("Course Does Not Exists");
+            }
+
+            course.Course_Code = data.Course_Code;
+            course.Course_Name = data.Course_Name;
+            course.Course_Weight = data.Course_Weight;
+
+            //Save object changes to database
+            try{await _context.SaveChangesAsync();}
+            catch{Unauthorized("Course Unsuccesfully edit");}
+
+            //success message
+            return Ok("Course edit Succesfully");
+
+        }
+
+
+
+
+        //Semesters edit api endpoint
+
+        //Given To Api: JWT Token Information and semester edit information
+
+        //Returned: either success or failure message
+        
+        [Authorize]//Check for valid JWT token
+        [HttpPost("Delete")]
+        public async Task<IActionResult> DeleteSemesterRequest([FromBody] Course data)
+        {
+            //Getting user information through claims from jwt token
+            var PublicId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var Email = User.FindFirstValue(ClaimTypes.Email);
+
+            //check if any of the user input is null
+            if (data.CourseId == null || data.SemesterId == null || data.Course_Code == null || data.Course_Name == null || data.Course_Weight == null)
+            {
+                return Unauthorized("Invalid Course Data information");
             }
 
             //find user in database
@@ -172,70 +234,26 @@ namespace GradifyApi.Controllers
             //find semester in database to edit
             var semester = await _context.Semester.FirstOrDefaultAsync(x =>user.StudentId == x.StudentId && data.SemesterId == x.SemesterId);
 
-            if (semester == null)
+            if (semester == null || semester.SemesterId == null)
             {
                 return Unauthorized("Semester Does Not Exists");
             }
 
-            semester.Semester_Term = data.Semester_Term;
-            semester.Semester_Year = data.Semester_Year;
+            var course = await _context.Course.FirstOrDefaultAsync(x =>semester.SemesterId == x.SemesterId && data.CourseId == x.CourseId);
+
+            if (course == null)
+            {
+                return Unauthorized("Course Does Not Exists");
+            }
+
+            _context.Course.Remove(course);
 
             //Save object changes to database
             try{await _context.SaveChangesAsync();}
-            catch{Unauthorized("Semester Unsuccesfully edit");}
+            catch{Unauthorized("Course Unsuccesfully Deleted");}
 
             //success message
-            return Ok("Semester edit Succesfully");
-
-        }
-
-
-
-        //Semesters edit api endpoint
-
-        //Given To Api: JWT Token Information and semester edit information
-
-        //Returned: either success or failure message
-        
-        [Authorize]//Check for valid JWT token
-        [HttpPost("Delete")]
-        public async Task<IActionResult> DeleteSemesterRequest([FromBody] SemesterInfoDto data)
-        {
-            //Getting user information through claims from jwt token
-            var PublicId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var Email = User.FindFirstValue(ClaimTypes.Email);
-
-            //check if any of the user input is null
-            if (data.Semester_Term == null || data.Semester_Year == null)
-            {
-                return Unauthorized("Invalid Semester Data information");
-            }
-
-            //find user in database
-            var user = await _context.Student.FirstOrDefaultAsync(x =>PublicId != null && x.PublicId.ToString() == PublicId.ToString()  && x.Email == Email);
-
-            //check if user exists
-            if (user == null || user.StudentId == null)
-            {
-                return NotFound();
-            }
-
-            //find semester in database to delete
-            var semester = await _context.Semester.FirstOrDefaultAsync(x =>user.StudentId == x.StudentId && data.SemesterId == x.SemesterId);
-
-            if (semester == null)
-            {
-                return Unauthorized("Semester Does Not Exists");
-            }
-
-            _context.Semester.Remove(semester);
-
-            //Save object changes to database
-            try{await _context.SaveChangesAsync();}
-            catch{Unauthorized("Semester Unsuccesfully Deleted");}
-
-            //success message
-            return Ok("Semester Deleted Succesfully");
+            return Ok("Course Deleted Succesfully");
 
         }
 
