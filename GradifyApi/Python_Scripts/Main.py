@@ -232,5 +232,5 @@ if __name__ == "__main__":
     #text_array = pdf_text.split()
     mark_split_dict = get_marks_split(pdf_text)
 
-    print("✅ Grade split:", mark_split_dict)
-    print("✅ Course code:", Course_code)
+    print("Grade split:", mark_split_dict)
+    print("Course code:", Course_code)

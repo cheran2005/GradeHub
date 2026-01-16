@@ -101,7 +101,7 @@ def get_marks_split(text):
 
                 
 
-        # FINAL EXAM
+   
       # FINAL EXAM
         if "final" in line and any(x in line for x in exam_strings):
             val = None
@@ -131,7 +131,7 @@ def get_marks_split(text):
                     if v is not None:
                         quiz_candidates.append(v)
 
-            # Regex fallback
+            # Regex 
             v = extract_percent_from_line(line)
             if v is not None:
                 quiz_candidates.append(v)
@@ -189,39 +189,37 @@ def extract_percent_from_line(line):
     if match:
         return float(match.group(1))
     return None
-
-if __name__=="__main__":
+if __name__ == "__main__":
 
     try:
         files = os.listdir(folder_path_course_outline)
         image_file = files[0]
-
-
     except Exception:
-        print(" No image files found in course_outline folder.")
+        print("No files found in course_outline folder.")
         exit()
 
     image_file_path = os.path.join(folder_path_course_outline, image_file)
 
-    if not image_file.lower().endswith("png" or "jpg" or "jpeg"):
-        print("File is not a image")
+    # Validate image type
+    if not image_file.lower().endswith((".png", ".jpg", ".jpeg")):
+        print("File is not a supported image.")
         exit()
 
-
-    get_marks=get_marks_split(image_file)
-    image_text = extract_text_from_image(image_file_path)
-    get_outline=get_coursename(image_file)
-    
-    if image_text == "INVALID":
-        print("Could not find evaluation section in image.")
+    # ---- OCR IMAGE ----
+    try:
+        img = Image.open(image_file_path)
+        image_text = pytesseract.image_to_string(img)
+    except Exception as e:
+        print(f"OCR failed: {e}")
         exit()
 
-    #text_array = pdf_text.split()
+    if not image_text.strip():
+        print("No text detected in image.")
+        exit()
+
+    # ---- PARSE GRADES ----
     mark_split_dict = get_marks_split(image_text)
+    course_code = get_coursename(image_file)
 
-    print("✅ Grade split:", mark_split_dict)
-    print("✅ Course code:", Course_code)
-
-
-
-    
+    print("Grade split:", mark_split_dict)
+    print("Course code:", course_code)
