@@ -6,7 +6,7 @@ This project is a **team effort** by:
 - **Cheran Balakrishnan**  
 - **Varen Rajoo**  
 - **Nithieshan Jeyaganeshan**  
-- **Nithian Brindamohan**
+- **Nithan Brindamohan**
 
 ---
 
