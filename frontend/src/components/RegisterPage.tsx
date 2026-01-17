@@ -1,46 +1,109 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
-export default function RegisterPage() {
+export default function Register() {
+  const [form, setForm] = useState({
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    console.log("Register submitted:", form);
+  }
+
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-8">
-      <div className="w-full max-w-5xl border-4 border-gray-200 rounded-2xl p-10">
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold">Welcome to GRADIFY   </h1>
-          <p className="mt-2 text-xl font-semibold text-gray-700">
-            A simple way to manage your grades
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-8">
+        {/* Title */}
+        <h1 className="text-2xl font-bold text-gray-900 text-center">
+          Create your account
+        </h1>
+        <p className="mt-1 text-sm text-gray-500 text-center">
+          Sign up to get started
+        </p>
 
-          <Link
-            to="/login"
-            className="inline-block mt-6 px-10 py-4 rounded-full border-4 border-black text-2xl font-bold"
+        {/* Form */}
+        <form onSubmit={onSubmit} className="mt-6 space-y-4">
+          <input
+            name="name"
+            value={form.name}
+            onChange={onChange}
+            placeholder="Full name"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+          />
+
+          <input
+            name="username"
+            value={form.username}
+            onChange={onChange}
+            placeholder="Username"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+          />
+
+          <input
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={onChange}
+            placeholder="Email address"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+          />
+
+          <input
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={onChange}
+            placeholder="Password"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+          />
+
+          <input
+            name="confirmPassword"
+            type="password"
+            value={form.confirmPassword}
+            onChange={onChange}
+            placeholder="Confirm password"
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            required
+          />
+
+          <button
+            type="submit"
+            className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 active:scale-[0.99]"
           >
-            Start now
+            Create account
+          </button>
+        </form>
+
+        {/* Footer */}
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600 hover:underline">
+            Sign in
           </Link>
-        </div>
-
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="border-4 border-gray-200 rounded-xl p-6 text-center">
-            <h2 className="text-2xl font-extrabold">Simple 🙂</h2>
-            <p className="mt-4 text-gray-700">
-              Gradify keeps grade tracking simple, so students can focus on
-              learning instead of calculations.
-            </p>
-          </div>
-
-          <div className="border-4 border-gray-200 rounded-xl p-6 text-center">
-            <h2 className="text-2xl font-extrabold">Secure 🔒</h2>
-            <p className="mt-4 text-gray-700">
-              Gradify prioritizes security to keep student data safe and
-              protected.
-            </p>
-          </div>
-
-          <div className="border-4 border-gray-200 rounded-xl p-6 text-center">
-            <h2 className="text-2xl font-extrabold">Organize! 🗂️</h2>
-            <p className="mt-4 text-gray-700">Now organize yourself already!</p>
-          </div>
-        </div>
+        </p>
       </div>
     </div>
   );
 }
+
